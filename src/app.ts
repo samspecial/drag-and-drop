@@ -3,12 +3,27 @@
 //interface
 interface Validatable{
     value: string|number;
-    require: boolean;
+    required: boolean;
     minLength?: number;
     maxLength?: number;
     min?: number;
     max?: number;
 }
+
+function validate(validateInput: Validatable){
+    let isValid = true;
+    if(validateInput.required){
+        isValid = isValid && validateInput.value.toString().trim().length !== 0;
+    }
+    if(validateInput.minLength != null && typeof validateInput.value === "string"){
+        isValid = isValid && validateInput.value.length > validateInput.minLength;
+    }
+    if(validateInput.maxLength != null && typeof validateInput.value === "string"){
+        isValid = isValid && validateInput.value.length < validateInput.maxLength;
+    }
+    return isValid;
+}
+
 
 //autobind decorator
 function autobind(_: any, _1: string, descriptor: PropertyDescriptor){
@@ -49,7 +64,26 @@ class ProjectTemplate{
         const title = this.titleInputElement.value;
         const description = this.descriptionInputElement.value;
         const people = this.peopleInputElement.value;
-        if(title.trim().length === 0 || description.trim().length === 0 || people.trim().length === 0){
+
+        const titleValidatable: Validatable = {
+            required:true,
+            value: title
+        }
+
+        const descriptionValidatable: Validatable = {
+            required: true,
+            minLength:5,
+            value:description
+        }
+
+        const peopleValidatable: Validatable = {
+            required:true,
+            value:people,
+            min:1,
+            max:5
+        }
+
+        if(!validate(titleValidatable) || !validate(descriptionValidatable) || !validate(peopleValidatable)){
             alert("Invalid input, please try again");
             return;
         }else{
@@ -58,6 +92,7 @@ class ProjectTemplate{
     
     }
 
+    
     private clearInputField():void{
         this.titleInputElement.value = "";
         this.descriptionInputElement.value = "";
